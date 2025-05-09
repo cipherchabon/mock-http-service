@@ -109,7 +109,7 @@ const MockForm = ({ initialMock, onSubmitSuccess }) => {
 
     // Helper para generar URL de ejemplo
     const getExampleUrl = () => {
-        const baseUrl = window.location.origin.replace(/:\d+/, ':3000');
+        const baseUrl = process.env.REACT_APP_API_URL || window.location.origin;
         const path = formData.path || '/example/path';
         const requesterId = formData.requesterId || 'exampleRequesterId';
         return `${baseUrl}/api${path}?requesterId=${requesterId}`;

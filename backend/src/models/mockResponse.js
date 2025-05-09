@@ -1,8 +1,24 @@
 // models/mockResponse.js
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-const db = new sqlite3.Database(path.join(__dirname, '..', 'db', 'mock.db'));
+// Asegurarse de que el directorio existe
+const dbDir = path.join(__dirname, '..', 'db');
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const dbPath = path.join(dbDir, 'mock.db');
+console.log('Database path:', dbPath);
+
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Error opening database:', err);
+    } else {
+        console.log('Connected to SQLite database');
+    }
+});
 
 // Crear tabla si no existe
 db.serialize(() => {
@@ -16,7 +32,13 @@ db.serialize(() => {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(path, requester_id)
     )
-  `);
+  `, (err) => {
+        if (err) {
+            console.error('Error creating table:', err);
+        } else {
+            console.log('Table created or already exists');
+        }
+    });
 });
 
 class MockResponse {

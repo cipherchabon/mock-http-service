@@ -1,5 +1,5 @@
 # ./frontend/Dockerfile
-FROM node:18-alpine as build
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -12,14 +12,17 @@ RUN npm install
 # Copiar el resto de los archivos
 COPY . .
 
-# Mostrar el contenido del directorio para debugging
-RUN ls -la
-
 # Compilar la aplicación de React
 RUN npm run build
 
-# Mostrar el contenido del directorio build para debugging
-RUN ls -la build
+# Instalar serve para servir la aplicación
+RUN npm install -g serve
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando para servir la aplicación
+CMD ["serve", "-s", "build", "-l", "3000"]
 
 # Imagen de producción
 FROM nginx:alpine

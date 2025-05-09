@@ -1,10 +1,17 @@
-
 // src/services/api.js
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
+const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+};
+
 export const fetchMocks = async () => {
     try {
-        const response = await fetch(`${API_BASE_URL}/admin/mocks`);
+        const response = await fetch(`${API_BASE_URL}/admin/mocks`, {
+            headers: defaultHeaders,
+            credentials: 'include'
+        });
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
         }
@@ -19,9 +26,8 @@ export const createMock = async (mockData) => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/mocks`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: defaultHeaders,
+            credentials: 'include',
             body: JSON.stringify(mockData),
         });
 
@@ -41,9 +47,8 @@ export const updateMock = async (id, mockData) => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/mocks/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: defaultHeaders,
+            credentials: 'include',
             body: JSON.stringify(mockData),
         });
 
@@ -63,6 +68,8 @@ export const deleteMock = async (id) => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/mocks/${id}`, {
             method: 'DELETE',
+            headers: defaultHeaders,
+            credentials: 'include'
         });
 
         if (!response.ok) {

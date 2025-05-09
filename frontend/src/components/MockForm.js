@@ -1,6 +1,6 @@
 // src/components/MockForm.js
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Alert, Card } from 'react-bootstrap';
+import { Form, Button, Alert, Card, Modal } from 'react-bootstrap';
 import { createMock, updateMock } from '../services/api';
 import JSONEditor from './JSONEditor';
 
@@ -14,6 +14,8 @@ const MockForm = ({ initialMock, onSubmitSuccess }) => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [validated, setValidated] = useState(false);
+    const [showTestModal, setShowTestModal] = useState(false);
+    const [testResult, setTestResult] = useState(null);
 
     useEffect(() => {
         if (initialMock) {
@@ -113,6 +115,27 @@ const MockForm = ({ initialMock, onSubmitSuccess }) => {
         return `${baseUrl}/api${path}?requesterId=${requesterId}`;
     };
 
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text).then(
+            () => alert('URL copiada al portapapeles'),
+            () => alert('Error al copiar la URL')
+        );
+    };
+
+    const testResponse = async () => {
+        try {
+            const response = await fetch(getExampleUrl());
+            const data = await response.json();
+            setTestResult({
+                status: response.status,
+                data: data
+            });
+            setShowTestModal(true);
+        } catch (err) {
+            setError('Error al probar la respuesta: ' + err.message);
+        }
+    };
+
     return (
         <div>
             <h2>{isEditing ? 'Editar Configuración Mock' : 'Crear Nueva Configuración Mock'}</h2>
@@ -158,7 +181,27 @@ const MockForm = ({ initialMock, onSubmitSuccess }) => {
                 </Form.Group>
 
                 <Card className="mb-3">
-                    <Card.Header>URL de Ejemplo</Card.Header>
+                    <Card.Header className="d-flex justify-content-between align-items-center">
+                        <span>URL de Ejemplo</span>
+                        <div>
+                            <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                className="me-2"
+                                onClick={() => copyToClipboard(getExampleUrl())}
+                            >
+                                Copiar URL
+                            </Button>
+                            <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={testResponse}
+                                disabled={!formData.path || !formData.requesterId}
+                            >
+                                Probar Respuesta
+                            </Button>
+                        </div>
+                    </Card.Header>
                     <Card.Body>
                         <code>{getExampleUrl()}</code>
                     </Card.Body>
@@ -183,6 +226,23 @@ const MockForm = ({ initialMock, onSubmitSuccess }) => {
                     Cancelar
                 </Button>
             </Form>
+
+            <Modal show={showTestModal} onHide={() => setShowTestModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Resultado de la Prueba</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <h5>Status: {testResult?.status}</h5>
+                    <pre className="bg-light p-3 rounded">
+                        {JSON.stringify(testResult?.data, null, 2)}
+                    </pre>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowTestModal(false)}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };
